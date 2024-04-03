@@ -1,0 +1,84 @@
+name: "Azure infrastructure INT deployment - $(Build.SourceBranchName) - $(Date:yyyyMMdd).$(Rev:r)"
+
+variables:
+  - group: dti-idp-int-av
+  - name: 'bkstrgrg' 
+    value: 'dti-de-devops'
+  - name: 'bkstrgaccount'
+    value: 'dtidedevopssa'
+  - name: 'bkcontainer'
+    value: 'idp-int-components-tfstate'
+  - name: 'bkstrgkey'
+    value: 'terraform.tfstate'
+
+trigger: none
+
+stages:
+  - stage: tfvalidate
+    jobs:
+      - job: validate
+        continueOnError: false
+        steps:
+          - task: TerraformInstaller@1
+            displayName: tfinstall
+            inputs:
+              terraformVersion: 'latest'  
+          - task: TerraformTaskV4@4
+            displayName: init
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'tfDeploymentAzure'
+              backendAzureRmResourceGroupName: '$(bkstrgrg)'
+              backendAzureRmStorageAccountName: '$(bkstrgaccount)'
+              backendAzureRmContainerName: '$(bkcontainer)'
+              backendAzureRmKey: '$(bkstrgkey)'
+              workingDirectory: $(System.DefaultWorkingDirectory)/int-components
+          - task: TerraformTaskV4@4
+            displayName: validate
+            inputs:
+              provider: 'azurerm'
+              command: 'validate'
+              workingDirectory: $(System.DefaultWorkingDirectory)/int-components
+          - task: TerraformTaskV4@4
+            displayName: plan
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              environmentServiceNameAzureRM: 'tfDeploymentAzure'
+              workingDirectory: $(System.DefaultWorkingDirectory)/int-components
+              commandOptions: '-var psql_username=$(kv-psql-username) -var psql_password=$(kv-psql-password)'
+  - stage: tfdeploy
+    condition: succeeded('tfvalidate')
+    dependsOn: tfvalidate
+    jobs:
+    - deployment: 'Deploy_Infra_ToAzureINT'
+      environment: 'Azure INT'
+      strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - task: TerraformInstaller@1
+                  displayName: tfinstall
+                  inputs:
+                    terraformVersion: 'latest'
+                - task: TerraformTaskV4@4
+                  displayName: init
+                  inputs:
+                    provider: 'azurerm'
+                    command: 'init'
+                    backendServiceArm: 'tfDeploymentAzure'
+                    backendAzureRmResourceGroupName: '$(bkstrgrg)'
+                    backendAzureRmStorageAccountName: '$(bkstrgaccount)'
+                    backendAzureRmContainerName: '$(bkcontainer)'
+                    backendAzureRmKey: '$(bkstrgkey)'
+                    workingDirectory: $(System.DefaultWorkingDirectory)/int-components
+                - task: TerraformTaskV4@4
+                  displayName: apply
+                  inputs:
+                    provider: 'azurerm'
+                    command: 'apply'
+                    environmentServiceNameAzureRM: 'tfDeploymentAzure'
+                    workingDirectory: $(System.DefaultWorkingDirectory)/int-components
+                    commandOptions: '-var psql_username=$(kv-psql-username) -var psql_password=$(kv-psql-password)'
