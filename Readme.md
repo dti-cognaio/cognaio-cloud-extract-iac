@@ -1,12 +1,13 @@
 # Terraform Repository for Azure Infrastructure IDP Services
-This repository deploys the infrastructure part of IDP-Services in Azure with Terraform.
+This repository serves as an example of how the infrastructure component for the idp services can be set up. Depending on the purpose and load, various components must be adapted.
 
 ## Prerequisites
-### Tools
+### Tools & Skills
 - [Install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 - [Install Azure CLI Tool](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 - Basic knowledge of Terraform
 - Subscription in an Azure Tenant
+  - Your Azure account must have a Cognitive Services Contributor role assigned in order for you to agree to the responsible AI terms and create a resource. To get this role assigned to your account, follow the steps in the [Assign roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-steps) documentation, or contact your administrator.
 
 ### Permissions
 - Permissions in Subscription to create other resources
@@ -43,13 +44,14 @@ Stores all secrets and credentials needed for the IDP-Application
 ## Usage
  - Fulfill [prerequisits](#prerequisites)
  - Adjust all parameters according to your needs and fill in the variables accordingly.
+    - run `terraform plan -var-file="test.tfvars"` to pass a variable file
 
 ### Variables
 
 | Name                                        | Description                                                                      | Value |
 | ------------------------------------------- | -------------------------------------------------------------------------------- | ----- |
-| `subscription_id`                           | global Azure subscritpion id                                                     | `""`  |
-| `ressource_group_name`                      | the resource group name where all resources will be deployed                     | `ais-test-rg`  |
+| `subscription_id`                           | global Azure subscription id                                                     | `<YOUR-SUBSCRIPTION-ID>`  |
+| `resources_group_name`                      | the resource group name where all resources will be deployed                     | `ais-test-rg`  |
 | `default_location`                          | default Azure location where resources will be placed                            | `switzerlandnorth`  |
 | `openAi_location`                           | default Azure location where OpenAi resources will be placed                     | `switzerlandnorth`  |
 | `deploy_application_gateway`                | deploy an application gateway with waf                                           | `true`   |
@@ -57,8 +59,8 @@ Stores all secrets and credentials needed for the IDP-Application
 | `is_container_registry_internally`          | check if container registry is in the same subscription if not deployed directly | `true`   |
 | `container_registry_name`                   | the name of the container registry                                               | `ais-test-cr` |
 | `container_registry_resource_group_name`    | the resource group of the container registry                                     | `ais-test-rg` |
-| `psql_username`                             | postgreSQL username                                                              | `admin`       |
-| `psql_password`                             | postgreSQL password                                                              | `adminpw`     |
+| `psql_username`                             | postgreSQL username                                                              | `<SQL-USER>`       |
+| `psql_password`                             | postgreSQL password                                                              | `<SQL-PASSWORD>`     |
 
 ## CheatSheet
 Check all commands in terraform [tutorial](https://developer.hashicorp.com/terraform/tutorials) page
@@ -67,3 +69,4 @@ Check all commands in terraform [tutorial](https://developer.hashicorp.com/terra
 - ```terraform plan``` Shows all changes where will be applied when executing, like a dry run ```apply```
 - ```terraform apply``` Applies all changes
 - ```terraform frm``` Formats all files
+- ```terraform destroy``` deletes the resources

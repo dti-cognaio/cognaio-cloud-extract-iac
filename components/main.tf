@@ -20,7 +20,7 @@ provider "azurerm" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "rg" {
-  name     = var.ressource_group_name
+  name     = var.resource_group_name
   location =  var.default_location
 }
 
@@ -161,7 +161,7 @@ data "azurerm_container_registry" "registry" {
 resource "azurerm_container_registry" "registry" {
   count = var.deploy_container_registry ? 1 : 0
   name                = var.container_registry_name
-  resource_group_name = var.ressource_group_name
+  resource_group_name = var.resource_group_name
   location            = azurerm_resource_group.rg.location
   sku                 = "Basic"
   admin_enabled       = false

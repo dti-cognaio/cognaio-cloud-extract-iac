@@ -3,7 +3,7 @@ variable "subscription_id" {
   nullable = false
 }
 
-variable "ressource_group_name" {
+variable "resource_group_name" {
   default  = "ais-test-rg"
   type     = string
   nullable = false
@@ -28,23 +28,25 @@ variable "deploy_application_gateway" {
 }
 
 variable "deploy_container_registry" {
-  default  = false
+  default  = true
   type     = bool
   nullable = false
 }
 
 variable "is_container_registry_internally" {
-  default  = false
+  default  = true
   type     = bool
   nullable = false
 }
 
 variable "container_registry_name" {
+  default  = "ais-test-cr"
   type     = string
   nullable = false
 }
 
 variable "container_registry_resource_group_name" {
+  default  = "ais-test-rg"
   type     = string
   nullable = false
 }
