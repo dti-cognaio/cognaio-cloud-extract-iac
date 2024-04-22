@@ -1,5 +1,5 @@
-# Terraform Repository for Azure Infrastructure IDP Services
-This repository serves as an example of how the infrastructure component for the idp services can be set up. Depending on the purpose and load, various components must be adapted.
+# Terraform repository for Azure infrastructure for COGNAiO® cloud extract
+This repository serves as an example of how the infrastructure component for the COGNAiO® cloud extract can be set up. Depending on the purpose and load, various components must be adapted.
 
 ## Prerequisites
 ### Tools & Skills
@@ -25,7 +25,7 @@ The repository creates the following resources as shown in the picture, dependin
 ![Alt text](assets/azure-idp-service-architecture.png)
 
 ### Subscription and Resource groups
-The Azure Subscription where all parts for the IDP resources are hosted. They can be managed into resource groups.
+The Azure Subscription where all parts for the COGNAiO® cloud extract resources are hosted. They can be managed into resource groups.
 ### Public IP
 Public IP who relates to the Application Gateway or directly to the Ingress-Controller of AKS if deployed without Application Gateway
 ### Application Gateway with WAF v2
@@ -33,13 +33,13 @@ This component is the central entry Point for all requests. For security reasons
 ### Azure Kubernetes Service (AKS)
 The Kubernetes cluster Service of Azure where the application runs as parts of Pods. The Application deployment is separate and done with Helm. The AKS is deployed with a system node pool and a working node pool.
 ### Azure PostgreSQL
-The Database for the persistance of the IDP application with some additional extensions enabled.
+The Database for the persistance of the COGNAiO® cloud extract application with some additional extensions enabled.
 ### OpenAI, Form Recognition, Cognitive Services
-This are all AI-Services needed for proper working of the IDP-Application.
+This are all AI-Services needed for proper working of the COGNAiO® cloud extract application.
 ### Container Registry
-Stores the Images needed for the IDP-Application can be externally and is not Part of this deployment.
+Stores the Images needed for the COGNAiO® cloud extract application can be externally and is not Part of this deployment.
 ### Azure Vault
-Stores all secrets and credentials needed for the IDP-Application
+Stores all secrets and credentials needed for the COGNAiO® cloud extract application
 
 ## Usage
  - Fulfill [prerequisits](#prerequisites)
