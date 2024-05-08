@@ -218,7 +218,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   automatic_channel_upgrade = "patch"
   sku_tier                  = "Free"
   dns_prefix                = "${azurerm_resource_group.rg.name}-aks-dns"
-  kubernetes_version        = "1.26.10"
+  kubernetes_version        = "1.29.2"
 
   default_node_pool {
     name                         = "default"

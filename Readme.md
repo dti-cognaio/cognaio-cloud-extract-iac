@@ -6,8 +6,11 @@ This repository serves as an example of how the infrastructure component for the
 - [Install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 - [Install Azure CLI Tool](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 - Basic knowledge of Terraform
+- Knowledge of productive application deployments in Azure
 - Subscription in an Azure Tenant
   - Your Azure account must have a Cognitive Services Contributor role assigned in order for you to agree to the responsible AI terms and create a resource. To get this role assigned to your account, follow the steps in the [Assign roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-steps) documentation, or contact your administrator.
+- Make sure you full fill the following requirements from this [article](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource?pivots=web-portal)
+  - You have completed the [Form](https://aka.ms/oai/access), submitted it and got access to OpenAi services.
 
 ### Permissions
 - Permissions in Subscription to create other resources
