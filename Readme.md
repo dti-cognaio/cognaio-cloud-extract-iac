@@ -43,6 +43,8 @@ This are all AI-Services needed for proper working of the COGNAiO® cloud extrac
 Stores the Images needed for the COGNAiO® cloud extract application can be externally and is not Part of this deployment.
 ### Azure Vault
 Stores all secrets and credentials needed for the COGNAiO® cloud extract application
+### Mail Account (Not part of Terraform)
+Mail account for sending emails from the application to it's user. 
 
 ## Usage
  - Fulfill [prerequisits](#prerequisites)

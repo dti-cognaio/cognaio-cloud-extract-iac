@@ -1,4 +1,9 @@
 # Change Log
+## Version 0.1.2
+### Changes
+- Add Mail Account in overview image and as part of the description
+
+# Change Log
 ## Version 0.1.1
 ### Changes
 - Adjust supported version in AKS cluster
