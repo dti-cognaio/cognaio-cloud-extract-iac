@@ -57,6 +57,7 @@ resource "azurerm_subnet" "subnet-resources" {
 }
 
 resource "azurerm_cognitive_account" "ai-service" {
+  count = var.deploy_openai_services ? 1 : 0
   name                = "${azurerm_resource_group.rg.name}-ai-service"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -65,6 +66,7 @@ resource "azurerm_cognitive_account" "ai-service" {
 }
 
 resource "azurerm_cognitive_account" "openai" {
+  count = var.deploy_openai_services ? 1 : 0
   name                  = "${azurerm_resource_group.rg.name}-openai"
   resource_group_name   = azurerm_resource_group.rg.name
   location              = var.openAi_location
@@ -78,8 +80,9 @@ resource "azurerm_cognitive_account" "openai" {
 }
 
 resource "azurerm_cognitive_deployment" "deployment_gpt35_turbo" {
+  count = var.deploy_openai_services ? 1 : 0
   name                 = "gpt-35-turbo"
-  cognitive_account_id = azurerm_cognitive_account.openai.id
+  cognitive_account_id = azurerm_cognitive_account.openai[0].id
   rai_policy_name      = "UserPromtsDisableContentFilter"
   model {
     format  = "OpenAI"
@@ -94,8 +97,9 @@ resource "azurerm_cognitive_deployment" "deployment_gpt35_turbo" {
 }
 
 resource "azurerm_cognitive_deployment" "deployment_gpt35_turbo_16k" {
+  count = var.deploy_openai_services ? 1 : 0
   name                 = "gpt-35-turbo-16k"
-  cognitive_account_id = azurerm_cognitive_account.openai.id
+  cognitive_account_id = azurerm_cognitive_account.openai[0].id
   rai_policy_name      = "UserPromtsDisableContentFilter"
   model {
     format  = "OpenAI"
@@ -110,8 +114,9 @@ resource "azurerm_cognitive_deployment" "deployment_gpt35_turbo_16k" {
 }
 
 resource "azurerm_cognitive_deployment" "deployment_embedding_ada_002" {
+  count = var.deploy_openai_services ? 1 : 0
   name                 = "text-embedding-ada-002"
-  cognitive_account_id = azurerm_cognitive_account.openai.id
+  cognitive_account_id = azurerm_cognitive_account.openai[0].id
   rai_policy_name      = "UserPromtsDisableContentFilter"
   model {
     format  = "OpenAI"
@@ -126,6 +131,7 @@ resource "azurerm_cognitive_deployment" "deployment_embedding_ada_002" {
 }
 
 resource "azurerm_cognitive_account" "formRecognizer" {
+  count = var.deploy_openai_services ? 1 : 0
   name                       = "${azurerm_resource_group.rg.name}-formRecognizer"
   resource_group_name        = azurerm_resource_group.rg.name
   location                   = var.openAi_location
@@ -143,6 +149,7 @@ resource "azurerm_cognitive_account" "formRecognizer" {
 
 # Azure Vault
 resource "azurerm_key_vault" "av" {
+  count = var.deploy_key_vault ? 1 : 0
   name                       = "${azurerm_resource_group.rg.name}-av"
   location                   = azurerm_resource_group.rg.location
   resource_group_name        = azurerm_resource_group.rg.name
@@ -169,24 +176,27 @@ resource "azurerm_container_registry" "registry" {
 
 # Postgresql
 resource "azurerm_private_dns_zone" "dns-zone" {
+  count = var.deploy_postgresql ? 1 : 0
   name                = "${azurerm_resource_group.rg.name}.private.postgres.database.azure.com"
   resource_group_name = azurerm_resource_group.rg.name
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "sql-network-link" {
+  count = var.deploy_postgresql ? 1 : 0
   name                  = "psql-dns-zone-link"
-  private_dns_zone_name = azurerm_private_dns_zone.dns-zone.name
+  private_dns_zone_name = azurerm_private_dns_zone.dns-zone[0].name
   virtual_network_id    = azurerm_virtual_network.vnet.id
   resource_group_name   = azurerm_resource_group.rg.name
 }
 
 resource "azurerm_postgresql_flexible_server" "sql-server" {
+  count = var.deploy_postgresql ? 1 : 0
   name                   = "${azurerm_resource_group.rg.name}-sql"
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
   version                = "14"
   delegated_subnet_id    = azurerm_subnet.subnet-resources.id
-  private_dns_zone_id    = azurerm_private_dns_zone.dns-zone.id
+  private_dns_zone_id    = azurerm_private_dns_zone.dns-zone[0].id
   administrator_login    = var.psql_username
   administrator_password = var.psql_password
   zone                   = "1"
@@ -198,12 +208,14 @@ resource "azurerm_postgresql_flexible_server" "sql-server" {
 }
 
 resource "azurerm_postgresql_flexible_server_configuration" "sql-config" {
+  count = var.deploy_postgresql ? 1 : 0
   name      = "azure.extensions"
-  server_id = azurerm_postgresql_flexible_server.sql-server.id
+  server_id = azurerm_postgresql_flexible_server.sql-server[0].id
   value     = "CITEXT,PGCRYPTO,VECTOR"
 }
 
 resource "azurerm_subnet" "subnet-aks" {
+  count = var.deploy_aks ? 1 : 0
   name                 = "subnet-idp-aks-int"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
@@ -212,6 +224,7 @@ resource "azurerm_subnet" "subnet-aks" {
 
 # AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks" {
+  count = var.deploy_aks ? 1 : 0
   name                      = "${azurerm_resource_group.rg.name}-aks"
   location                  = azurerm_resource_group.rg.location
   resource_group_name       = azurerm_resource_group.rg.name
@@ -223,10 +236,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
   default_node_pool {
     name                         = "default"
     node_count                   = 2
-    vm_size                      = "Standard_D2s_v3"
+    vm_size                      = var.deploy_aks_separated_work_system_node_pool ? "Standard_D2s_v3" : "Standard_D4s_v3"
     max_pods                     = 60
-    vnet_subnet_id               = azurerm_subnet.subnet-aks.id
-    only_critical_addons_enabled = true # supported
+    vnet_subnet_id               = azurerm_subnet.subnet-aks[0].id
+    only_critical_addons_enabled = var.deploy_aks_separated_work_system_node_pool ? true : false
     #zones           = ["1"] 
   }
 
@@ -255,29 +268,31 @@ dynamic "ingress_application_gateway" {
   azure_active_directory_role_based_access_control {
     azure_rbac_enabled = true
     managed            = true
-    tenant_id          = "e0fb3e0c-cab1-4e3a-9aa8-f90bd991811b"
+    tenant_id          = var.tenant_id
   }
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "np_workload_1" {
+  count = var.deploy_aks && var.deploy_aks_separated_work_system_node_pool ? 1 : 0
   name                  = "workload1"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks[0].id
   vm_size               = "Standard_D4s_v3"
   max_pods              = 60
   node_count            = 2
-  vnet_subnet_id        = azurerm_subnet.subnet-aks.id
+  vnet_subnet_id        = azurerm_subnet.subnet-aks[0].id
   mode                  = "User"
   #zones                = ["1"] 
 }
 
 resource "azurerm_role_assignment" "aks_to_registry_role"  {
-  count = var.is_container_registry_internally ? 1 : 0
+  count = var.is_container_registry_internally && var.deploy_aks ? 1 : 0
   scope                = var.deploy_container_registry ? azurerm_container_registry.registry[count.index].id : data.azurerm_container_registry.registry[count.index].id
   role_definition_name = "AcrPull"
-  principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
+  principal_id         = azurerm_kubernetes_cluster.aks[0].kubelet_identity[0].object_id
 }
 
 resource "azurerm_public_ip" "pip" {
+  count = var.deploy_public_ip ? 1 : 0
   name                = "${azurerm_resource_group.rg.name}-pip"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -322,7 +337,7 @@ resource "azurerm_application_gateway" "gw" {
 
   frontend_ip_configuration {
     name                 = "appGatewayFrontendIP"
-    public_ip_address_id = azurerm_public_ip.pip.id
+    public_ip_address_id = azurerm_public_ip.pip[0].id
   }
 
   frontend_port {
