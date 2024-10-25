@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.0"
+      version = "~>4.0"
     }
   }
   # backend "azurerm" {
@@ -14,6 +14,7 @@ terraform {
 }
 
 provider "azurerm" {
+  subscription_id = var.subscription_id
   features {}
 }
 
@@ -25,7 +26,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = "vnet-idp"
+  name                = "${azurerm_resource_group.rg.name}-vnet-idp"
   address_space       = ["172.16.0.0/16"]
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -79,54 +80,54 @@ resource "azurerm_cognitive_account" "openai" {
   }
 }
 
-resource "azurerm_cognitive_deployment" "deployment_gpt35_turbo" {
+resource "azurerm_cognitive_deployment" "deployment_gpt4o" {
   count = var.deploy_openai_services ? 1 : 0
-  name                 = "gpt-35-turbo"
+  name                 = "gpt-4o"
   cognitive_account_id = azurerm_cognitive_account.openai[0].id
   rai_policy_name      = "UserPromtsDisableContentFilter"
   model {
     format  = "OpenAI"
-    name    = "gpt-35-turbo"
-    version = "0613"
+    name    = "gpt-4o"
+    version = "2024-05-13"
   }
 
-  scale {
-    type = "Standard"
-    capacity = 122
+  sku {
+    name = "Standard"
+    capacity = 5
   }
 }
 
-resource "azurerm_cognitive_deployment" "deployment_gpt35_turbo_16k" {
+resource "azurerm_cognitive_deployment" "deployment_4o_mini" {
   count = var.deploy_openai_services ? 1 : 0
-  name                 = "gpt-35-turbo-16k"
+  name                 = "gpt-4o-mini"
   cognitive_account_id = azurerm_cognitive_account.openai[0].id
   rai_policy_name      = "UserPromtsDisableContentFilter"
   model {
     format  = "OpenAI"
-    name    = "gpt-35-turbo-16k"
-    version = "0613"
+    name    = "gpt-4o-mini"
+    version = "2024-07-18"
   }
 
-  scale {
-    type = "Standard"
-    capacity = 118
+  sku {
+    name = "Standard"
+    capacity = 5
   }
 }
 
-resource "azurerm_cognitive_deployment" "deployment_embedding_ada_002" {
+resource "azurerm_cognitive_deployment" "deployment_embedding_3_large" {
   count = var.deploy_openai_services ? 1 : 0
-  name                 = "text-embedding-ada-002"
+  name                 = "text-embedding-3-large"
   cognitive_account_id = azurerm_cognitive_account.openai[0].id
   rai_policy_name      = "UserPromtsDisableContentFilter"
   model {
     format  = "OpenAI"
-    name    = "text-embedding-ada-002"
-    version = "2"
+    name    = "text-embedding-3-large"
+    version = "1"
   }
 
-  scale {
-    type = "Standard"
-    capacity = 30
+  sku {
+    name = "Standard"
+    capacity = 10
   }
 }
 
@@ -195,6 +196,7 @@ resource "azurerm_postgresql_flexible_server" "sql-server" {
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
   version                = "14"
+  public_network_access_enabled = false
   delegated_subnet_id    = azurerm_subnet.subnet-resources.id
   private_dns_zone_id    = azurerm_private_dns_zone.dns-zone[0].id
   administrator_login    = var.psql_username
@@ -228,7 +230,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   name                      = "${azurerm_resource_group.rg.name}-aks"
   location                  = azurerm_resource_group.rg.location
   resource_group_name       = azurerm_resource_group.rg.name
-  automatic_channel_upgrade = "patch"
+  automatic_upgrade_channel = "patch"
   sku_tier                  = "Free"
   dns_prefix                = "${azurerm_resource_group.rg.name}-aks-dns"
   kubernetes_version        = "1.29.2"
@@ -267,7 +269,6 @@ dynamic "ingress_application_gateway" {
 
   azure_active_directory_role_based_access_control {
     azure_rbac_enabled = true
-    managed            = true
     tenant_id          = var.tenant_id
   }
 }

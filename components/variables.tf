@@ -21,7 +21,7 @@ variable "default_location" {
 }
 
 variable "openAi_location" {
-  default  = "switzerlandnorth"
+  default  = "swedencentral"
   type     = string
   nullable = false
 }

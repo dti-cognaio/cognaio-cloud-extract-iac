@@ -1,8 +1,8 @@
-# Terraform repository for Azure infrastructure for COGNAiO® cloud extract
-This repository serves as an example of how the infrastructure component for the COGNAiO® cloud extract can be set up.
+# Terraform repository for Azure infrastructure for COGNAiO® Cloud Extract
+This repository serves as an example of how the infrastructure component for the COGNAiO® Cloud Extract can be set up.
 
 COGNAiO cloud extract is a cloud native application and can be installed via [HelmCharts](https://github.com/dti-cognaio/cognaio-cloud-extract-helm). The application requires a postgreSQL and various OpenAi components from Azure. The mandatory resources are marked (*) below in the detailed description. All other infrastructure components can be customized as needed, as long as the application has the connections to the mentioned resources. Feel free to:
-- deploy COGNAiO® cloud extract without application gateway. 
+- deploy COGNAiO® Cloud Extract without application gateway. 
 - Customize the Ip-Ranges. 
 - Customize the SKU tiers to your needs etc.
 - Scale the AKS cluster to your needs
@@ -35,29 +35,41 @@ The repository creates the following resources as shown in the picture, dependin
 ![Alt text](assets/azure-idp-service-architecture.png)
 
 ### Subscription and Resource groups *
-The Azure Subscription where all parts for the COGNAiO® cloud extract resources are hosted. They can be managed into resource groups.
+The Azure Subscription where all parts for the COGNAiO® Cloud Extract resources are hosted. They can be managed into resource groups.
 ### Public IP
 Public IP who relates to the Application Gateway or directly to the Ingress-Controller of AKS if deployed without Application Gateway
 ### Application Gateway with WAF v2
 This component is the central entry Point for all requests. For security reasons a WAF (Web Application Firewall) is included into this component. Allow only secure Ciphers.
 ### Azure Kubernetes Service (AKS)
 The Kubernetes cluster Service of Azure where the application runs as parts of Pods. The Application deployment is separate and done with Helm. The AKS is deployed with a system node pool and a working node pool.
+#### Tested Kubernetes versions:
+- v1.30.x
+- v1.29.x
+- v1.28.x
+- v1.27.x
+- v1.26.x
+
 ### Azure PostgreSQL *
-The Database for the persistance of the COGNAiO® cloud extract application with some additional extensions enabled.
+The Database for the persistance of the COGNAiO® Cloud Extract application with some additional extensions enabled.
+#### Tested Postgres versions:
+- v15.4
+- v14.13
+- v14.12
+
 ### OpenAI, Form Recognition, Cognitive Services *
-This are all AI-Services needed for proper working of the COGNAiO® cloud extract application.
+This are all AI-Services needed for proper working of the COGNAiO® Cloud Extract application.
 #### OpenAi Models
 This deployment provides three openAi models. If other models where needed to fit your needs, feel free to deploy them
-- text-embedding-ada-002
-- gpt-35-turbo-16k
-- gpt-35-turbo
+- text-embedding-3-large
+- gpt-4o
+- gpt-4o-mini
 ### Container Registry
-Stores the Images needed for the COGNAiO® cloud extract application can be externally and is not Part of this deployment.
+Stores the Images needed for the COGNAiO® Cloud Extract application can be externally and is not Part of this deployment.
 ### Azure Vault
-Stores all secrets and credentials needed for the COGNAiO® cloud extract application
+Stores all secrets and credentials needed for the COGNAiO® Cloud Extract application
 ### Mail Account (Not part of Terraform) *
 Mail account for sending emails from the application to it's user. 
-> \* This resources are required so that COGNAiO® cloud extract runs properly.
+> \* This resources are required so that COGNAiO® Cloud Extract runs properly.
 
 ## Usage
  - Fulfill [prerequisits](#prerequisites)
@@ -73,7 +85,7 @@ Mail account for sending emails from the application to it's user.
 | `subscription_id`                           | Azure subscription id                                                            | `<YOUR-SUBSCRIPTION-ID>`  |
 | `resources_group_name`                      | the resource group name where all resources will be deployed                     | `ais-test-rg`             |
 | `default_location`                          | default Azure location where resources will be placed                            | `switzerlandnorth`        |
-| `openAi_location`                           | default Azure location where OpenAi resources will be placed                     | `switzerlandnorth`        |
+| `openAi_location`                           | default Azure location where OpenAi resources will be placed                     | `swedencentral`           |
 | `deploy_application_gateway`                | deploy an application gateway with waf                                           | `true`                    |
 | `deploy_openai_services`                    | deploy all cognitive openAi services                                             | `true`                    |
 | `deploy_postgresql`                         | deploy postgreSQL database                                                       | `true`                    |
