@@ -80,36 +80,36 @@ resource "azurerm_cognitive_account" "openai" {
   }
 }
 
-resource "azurerm_cognitive_deployment" "deployment_gpt4o" {
+resource "azurerm_cognitive_deployment" "deployment_gpt" {
   count = var.deploy_openai_services ? 1 : 0
-  name                 = "gpt-4o"
+  name                 = "gpt-4.1"
   cognitive_account_id = azurerm_cognitive_account.openai[0].id
-  rai_policy_name      = "UserPromtsDisableContentFilter"
+
   model {
     format  = "OpenAI"
-    name    = "gpt-4o"
-    version = "2024-05-13"
+    name    = "gpt-4.1"
+    version = "2025-04-14"
   }
 
   sku {
-    name = "Standard"
+    name = "GlobalStandard"
     capacity = 5
   }
 }
 
-resource "azurerm_cognitive_deployment" "deployment_4o_mini" {
+resource "azurerm_cognitive_deployment" "deployment_gpt_mini" {
   count = var.deploy_openai_services ? 1 : 0
-  name                 = "gpt-4o-mini"
+  name                 = "gpt-4.1-mini"
   cognitive_account_id = azurerm_cognitive_account.openai[0].id
-  rai_policy_name      = "UserPromtsDisableContentFilter"
+
   model {
     format  = "OpenAI"
-    name    = "gpt-4o-mini"
-    version = "2024-07-18"
+    name    = "gpt-4.1-mini"
+    version = "2025-04-14"
   }
 
   sku {
-    name = "Standard"
+    name = "GlobalStandard"
     capacity = 5
   }
 }
@@ -118,7 +118,7 @@ resource "azurerm_cognitive_deployment" "deployment_embedding_3_large" {
   count = var.deploy_openai_services ? 1 : 0
   name                 = "text-embedding-3-large"
   cognitive_account_id = azurerm_cognitive_account.openai[0].id
-  rai_policy_name      = "UserPromtsDisableContentFilter"
+
   model {
     format  = "OpenAI"
     name    = "text-embedding-3-large"
@@ -195,7 +195,7 @@ resource "azurerm_postgresql_flexible_server" "sql-server" {
   name                   = "${azurerm_resource_group.rg.name}-sql"
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
-  version                = "14"
+  version                = "16"
   public_network_access_enabled = false
   delegated_subnet_id    = azurerm_subnet.subnet-resources.id
   private_dns_zone_id    = azurerm_private_dns_zone.dns-zone[0].id
@@ -213,7 +213,7 @@ resource "azurerm_postgresql_flexible_server_configuration" "sql-config" {
   count = var.deploy_postgresql ? 1 : 0
   name      = "azure.extensions"
   server_id = azurerm_postgresql_flexible_server.sql-server[0].id
-  value     = "CITEXT,PGCRYPTO,VECTOR"
+  value     = "CITEXT,PGCRYPTO,VECTOR,PG_TRGM,FUZZYSTRMATCH"
 }
 
 resource "azurerm_subnet" "subnet-aks" {
@@ -233,7 +233,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   automatic_upgrade_channel = "patch"
   sku_tier                  = "Free"
   dns_prefix                = "${azurerm_resource_group.rg.name}-aks-dns"
-  kubernetes_version        = "1.29.2"
+  kubernetes_version        = "1.32.6"
 
   default_node_pool {
     name                         = "default"
@@ -243,6 +243,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vnet_subnet_id               = azurerm_subnet.subnet-aks[0].id
     only_critical_addons_enabled = var.deploy_aks_separated_work_system_node_pool ? true : false
     #zones           = ["1"] 
+
+    upgrade_settings {
+      drain_timeout_in_minutes      = 0
+      max_surge                     = "10%"
+      node_soak_duration_in_minutes = 0
+    }
   }
 
   identity {
@@ -297,6 +303,7 @@ resource "azurerm_public_ip" "pip" {
   name                = "${azurerm_resource_group.rg.name}-pip"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
+  domain_name_label   = azurerm_resource_group.rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
 }
@@ -409,19 +416,9 @@ resource "azurerm_application_gateway" "gw" {
   }
 
   ssl_policy {
-    policy_type          = "Custom"
+    policy_type          = "CustomV2"
     policy_name          = "AppGwSslPolicy20220101S"
-    min_protocol_version = "TLSv1_2"
-    cipher_suites = [
-      "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-      "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
-      "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
-      "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-      "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
-      "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
-      "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
-      "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
-    ]
+    min_protocol_version = "TLSv1_3"
   }
 
   lifecycle {

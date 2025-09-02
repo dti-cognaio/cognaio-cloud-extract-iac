@@ -1,5 +1,13 @@
 
 # Change Log
+## Version 0.3.0
+> tested with COGNAiO® Cloud Extract version 2.5.0
+### Changes
+- Add more needed extensions to postgreSQL
+- Use new OpenAI models like gpt-4.1 and gpt-4.1-mini
+- Update postgreSQL version 
+- Remove OpenAI custom content filter
+- Increase Kubernetes version
 ## Version 0.2.0
 > tested with COGNAiO® Cloud Extract version 2.3.0
 ### Changes
