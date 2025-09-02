@@ -43,6 +43,8 @@ This component is the central entry Point for all requests. For security reasons
 ### Azure Kubernetes Service (AKS)
 The Kubernetes cluster Service of Azure where the application runs as parts of Pods. The Application deployment is separate and done with Helm. The AKS is deployed with a system node pool and a working node pool.
 #### Tested Kubernetes versions:
+- v1.32.x
+- v1.31.x
 - v1.30.x
 - v1.29.x
 - v1.28.x
@@ -52,6 +54,7 @@ The Kubernetes cluster Service of Azure where the application runs as parts of P
 ### Azure PostgreSQL *
 The Database for the persistance of the COGNAiO® Cloud Extract application with some additional extensions enabled.
 #### Tested Postgres versions:
+- v16.x
 - v15.4
 - v14.13
 - v14.12
@@ -61,8 +64,8 @@ This are all AI-Services needed for proper working of the COGNAiO® Cloud Extrac
 #### OpenAi Models
 This deployment provides three openAi models. If other models where needed to fit your needs, feel free to deploy them
 - text-embedding-3-large
-- gpt-4o
-- gpt-4o-mini
+- gpt-4.1
+- gpt-4.1-mini
 ### Container Registry
 Stores the Images needed for the COGNAiO® Cloud Extract application can be externally and is not Part of this deployment.
 ### Azure Vault
